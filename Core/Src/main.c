@@ -83,6 +83,7 @@ int RDir = POS_R_DIR, LDir = POS_L_DIR;
 GPIO_PinState RIN1 = RESET, RIN2 = SET, LIN1 = RESET, LIN2 = SET;
 double posKp = 30.0, posKi = 0.9, posKd = 180.0;
 int posKiThreshold = 300;
+int biasThreshold = 15;                                     //New algorithm designed by me
 double velKp=80.0, velKi=200.0;
 double RPWM = 0, LPWM = 0;
 /* USER CODE END PV */
@@ -170,6 +171,18 @@ void IncrementalPI(void) {
 }
 
 /**
+    * @breif    Compute the absolute value of x.
+    * @note     None
+    * @param    x
+    * @retval   None
+    */
+int AbsOf(int x){
+    if(x < 0)   x = -x;
+
+    return x;
+}
+
+/**
     * @breif    Use position PID algorithm to renew PWM signals.
     * @note     None
     * @param    None
@@ -179,9 +192,10 @@ void Position_PID(void) {
     static int lastRPosBias, lastLPosBias, LPosBiasIntergral, RPosBiasIntergral;
     int RPosBias = RTargetPos - RMotorCount;                    //compute posBias
     int LPosBias = LTargetPos - LMotorCount;                    //compute posBias
-    if (RPosBias <= posKiThreshold && RPosBias >= -posKiThreshold)
+    int biasOfRPosBias = AbsOf(RPosBias - lastRPosBias), biasOfLPosBias = AbsOf(LPosBias - lastLPosBias);
+    if (biasOfRPosBias <= biasThreshold)                                     //New algorithm designed by me
         RPosBiasIntergral += RPosBias;                        //compute intergral of posBias
-    if (LPosBias <= posKiThreshold && LPosBias >= -posKiThreshold)
+    if (LPosBias <= biasThreshold)                                     //New algorithm designed by me
         LPosBiasIntergral += LPosBias;                        //compute intergral of posBias
     RPWM = (posKp * RPosBias / 100.0 + posKi / 100 * RPosBiasIntergral + posKd / 100 * (RPosBias - lastRPosBias)) / MAX_PWM * MOTOR_MAX_VEL;
     LPWM = (posKp * LPosBias / 100.0 + posKi / 100 * LPosBiasIntergral + posKd / 100 * (LPosBias - lastLPosBias)) / MAX_PWM * MOTOR_MAX_VEL;
