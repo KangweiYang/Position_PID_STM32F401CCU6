@@ -1,3 +1,0 @@
-/home/felix/CLionProjects/Position_PID/cmake-build-debug/CMakeFiles/Position_PID.elf.dir
-/home/felix/CLionProjects/Position_PID/cmake-build-debug/CMakeFiles/edit_cache.dir
-/home/felix/CLionProjects/Position_PID/cmake-build-debug/CMakeFiles/rebuild_cache.dir
